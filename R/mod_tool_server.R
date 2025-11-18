@@ -81,6 +81,7 @@ mod_tool_server <- function(id, rv) {
       # rv$inputs <- list()
       # rv$mcs <- list()
       # path <- system.file("extdata/example1-4pools.xlsx", package = "mocaredd")
+      # path <- system.file("extdata/example2-with-sims.xlsx", package = "mocaredd")
       # .cs <- rv$inputs$cs <- readxl::read_xlsx(path = path, sheet = "c_stocks", na = "NA")
       # .ad <- rv$inputs$ad <- readxl::read_xlsx(path = path, sheet = "AD_lu_transitions", na = "NA")
       # .usr <- rv$inputs$usr <- readxl::read_xlsx(path = path, sheet = "user_inputs", na = "NA")

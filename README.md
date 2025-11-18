@@ -114,7 +114,6 @@ mocaredd::shiny_run_mocaredd()
 -   Add truncated PDFs support.
 -   Add IPCC tier 1 uncertainties propagation around the arithmetic means.
 
-```{=html}
 <!--
 
 Current features:
@@ -131,4 +130,3 @@ Current features:
 -   Show sansitivity analysis
 
 -->
-```

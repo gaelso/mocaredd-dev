@@ -408,7 +408,7 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## + 3.1.4 LU transitions sims ------
+      ## + 3.1.4 Run LU transition level sims ------
       shinyWidgets::updateProgressBar(
         title = "Simulate emissions for each land use transition...",
         session = session, id = "prog_res", value = 10, status = "primary"
@@ -441,7 +441,7 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## simulation aggregates -------------------------------------------------
+      ## + 3.1.5 Aggregate simulations ------
       shinyWidgets::updateProgressBar(
         title = "Calculate Emission Reductions...",
         session = session, id = "prog_res", value = 40, status = "primary"
@@ -462,7 +462,7 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## ++ Get stats from simulations -----------------------------------------
+      ## + 3.1.6 Get stats from simulations -------
       shinyWidgets::updateProgressBar(
         title = "Get medians and confidence intervals...",
         session = session, id = "prog_res", value = 60, status = "primary"
@@ -518,7 +518,7 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## ++ Prepa forest plots -------------------------------------------------
+      ## + 3.1.7 Prepare forest plots -------------------------------------------------
       shinyWidgets::updateProgressBar(
         title = "Prepare outputs...",
         session = session, id = "prog_res", value = 80, status = "primary"
@@ -566,7 +566,7 @@ mod_tool_server <- function(id, rv) {
       )
 
 
-      ## ++ Finalize -----------------------------------------------------------
+      ## + 3.1.8 Finalize ------
       shinyWidgets::updateProgressBar(
         title = "All steps completed!",
         session = session, id = "prog_res", value = 100, status = "success"
@@ -577,9 +577,30 @@ mod_tool_server <- function(id, rv) {
     })
 
 
-    ## 2.3 Outputs =============================================================
+    ##
+    ## 4. RES TAB OUTPUTS ######################################################
+    ##
 
-    ## ++ Downloads ------------------------------------------------------------
+    ## 4.1 Show res conditionally ==============================================
+
+    # Update show / hide panels
+    observe({
+      req(rv$mcs$all_done)
+
+      if (rv$mcs$all_done) shinyjs::show("res_show") else shinyjs::hide("res_show")
+
+    })
+
+    observeEvent(input$btn_show_res, {
+      shinyjs::hide("res_progress")
+      shinyjs::hide("res_show")
+      shinyjs::show("res_cards")
+
+    })
+
+
+    ## 4.2 Downloads ===========================================================
+
     output$dl_ari <- downloadHandler(
       filename = function(){"mocaredd - arithmetic mean based emission reductions.csv"},
       content  = function(file){utils::write.csv(rv$checks$ari_res$ER, file)}
@@ -605,7 +626,7 @@ mod_tool_server <- function(id, rv) {
     #   content  = function(file){utils::write.csv(rv$checks$ari_res$ER, file)}
     # )
 
-    ## ++ Forest plots ---------------------------------------------------------
+    ## 4.3 Forest plots ========================================================
 
     # output$res_trans_fp <- gt::render_gt({
     #   req(rv$mcs$fp_trans)
@@ -627,9 +648,9 @@ mod_tool_server <- function(id, rv) {
       rv$mcs$fp_ER
 
     })
-    ## ++ Histograms -----------------------------------------------------------
+    ## 4.4 Histograms ==========================================================
 
-    ## +++ Final emissions and ER simulations ----
+    ## + 4.4.1 Final emissions and ER simulations ----
     output$res_select_ER_hist_UI <- renderUI({
       selectInput(
         inputId = ns("res_select_ER_hist"),
@@ -673,7 +694,7 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## +++ REDD+ and time period level emissions ----
+    ## + 4.4.2 REDD+ and time period level emissions ----
     output$res_select_redd_hist_UI <- renderUI({
       selectInput(
         inputId = ns("res_select_redd_hist"),
@@ -705,22 +726,22 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## 2.4 Show res conditionally ==============================================
-
-    # Update show / hide panels
-    observe({
-      req(rv$mcs$all_done)
-
-      if (rv$mcs$all_done) shinyjs::show("res_show") else shinyjs::hide("res_show")
-
-    })
-
-    observeEvent(input$btn_show_res, {
-      shinyjs::hide("res_progress")
-      shinyjs::hide("res_show")
-      shinyjs::show("res_cards")
-
-    })
+    # ## 2.4 Show res conditionally
+    #
+    # # Update show / hide panels
+    # observe({
+    #   req(rv$mcs$all_done)
+    #
+    #   if (rv$mcs$all_done) shinyjs::show("res_show") else shinyjs::hide("res_show")
+    #
+    # })
+    #
+    # observeEvent(input$btn_show_res, {
+    #   shinyjs::hide("res_progress")
+    #   shinyjs::hide("res_show")
+    #   shinyjs::show("res_cards")
+    #
+    # })
 
     ##
     ## 3. Sensitivity analysis #################################################

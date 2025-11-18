@@ -295,7 +295,7 @@ fct_combine_mcs_E <- function(.ad, .cs, .usr){
     ## TBD
     ## Get annual AD
     ## get initial CS at beginning of period, final CS and delta CS per year.
-    ## Reconstruct AD and EF for est period REF adn MON_X
+    ## Reconstruct AD and EF for est period REF and MON_X
     sims_E <- 'Different CS for different time periods not yet implemented (C_period != "ALL")'
 
   }

@@ -10,7 +10,7 @@ mod_tool_server <- function(id, rv) {
     ns <- session$ns
 
     ##
-    ## 1. Data upload sidebar server ###########################################
+    ## 1. SIDEBAR CHECK ACTIONS ################################################
     ##
 
     ## 1.1 BTN Download ========================================================
@@ -41,18 +41,19 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## 1.3 Read data and run checks ============================================
+    ## 1.3 BTN Run checks ======================================================
+    ## Read data and run checks
 
     observeEvent(input$btn_run_checks, {
 
-      ## ++ Move to tabset CHECK -----
+      ## + 1.3.1 Move to tabset CHECK ----
       updateTabsetPanel(
         session,
         inputId = ns("tool_tabs"),
         selected = "check_panel"
       )
 
-      ## ++ Show progress bar --------------------------------------------------
+      ## + 1.3.2 Show progress bar ----
       shinyjs::hide("check_init_msg")
       shinyjs::show("check_progress")
       shinyjs::hide("check_show")
@@ -62,7 +63,7 @@ mod_tool_server <- function(id, rv) {
       ## Reset indicator that all checks are done
       rv$checks$all_done <- NULL
 
-      ## ++ Read data ----------------------------------------------------------
+      ## + 1.3.3 Read data ----
       shinyWidgets::updateProgressBar(
         title = "Loading data...",
         session = session, id = "prog_allchecks", value = 0, status = "primary"
@@ -87,11 +88,10 @@ mod_tool_server <- function(id, rv) {
       ##
 
 
-
-      ## ++ Run checks ---------------------------------------------------------
+      ## + 1.3.4 Run checks -----
       shinyWidgets::updateProgressBar(
         title = "Checking input file...",
-        session = session, id = "prog_allchecks", value = 25
+        session = session, id = "prog_allchecks", value = 50
       )
 
       ## Use fct_check_data2()
@@ -104,10 +104,10 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## ++ Calculations -------------------------------------------------------
+      ## + 1.3.5 Run calculations -------------------------------------------------------
       shinyWidgets::updateProgressBar(
         title = "Running Calculations...",
-        session = session, id = "prog_allchecks", value = 50
+        session = session, id = "prog_allchecks", value = 70
       )
 
       ## !!! UPDATE INPUTS !!!
@@ -120,19 +120,17 @@ mod_tool_server <- function(id, rv) {
 
       Sys.sleep(0.1)
 
-      ## ++ Outputs ------------------------------------------------------------
-      ## outputs are calculated once new data is uploaded so they are performed here
-      ## instead of the render*({}) functions
-
+      ## + 1.3.6 PLACEHOLDER Prepare outputs ----
       ## !!! NOT IMPLEMENTED - see outputs section
-      shinyWidgets::updateProgressBar(
-        title = "Preparing outputs...",
-        session = session, id = "prog_allchecks", value = 50
-      )
 
-      Sys.sleep(0.5)
+      # shinyWidgets::updateProgressBar(
+      #   title = "Preparing outputs...",
+      #   session = session, id = "prog_allchecks", value = 80
+      # )
+      #
+      # Sys.sleep(0.5)
 
-      ## ++ Finalize -----------------------------------------------------------
+      ## + 1.3.7 Finalize Check -----
       shinyWidgets::updateProgressBar(
         title = "All steps completed...",
         session = session, id = "prog_allchecks", value = 100, status = "success"
@@ -140,7 +138,7 @@ mod_tool_server <- function(id, rv) {
 
       rv$checks$all_done <- TRUE
 
-      ## ++ Enable run MCS -----------------------------------------------------
+      ## + 1.3.8 Enable run MCS ----
 
       if(rv$checks$check_data$all_ok) {
         shinyjs::hide("msg_no_check")
@@ -154,17 +152,39 @@ mod_tool_server <- function(id, rv) {
         shinyjs::disable("btn_run_mcs")
       }
 
-    })
+    }) ## END 1.3 observeEvent()
 
-    ## 1.4 Prepare Outputs =====================================================
+    ##
+    ## 2. CHECK PANEL OUTPUTS ##################################################
+    ##
 
     # ## !!! TMP: Show xlsx_tabs_ok
     # output$ctrl_input <- renderText({
     #   rv$inputs$xlsx_tabs_ok
     # })
 
-    ## ++ value box content ----------------------------------------------------
-    ## +++ Time VB ----
+    ## 2.1 Show check panel ====================================================
+
+    ## Update show / hide panels
+    observe({
+      req(rv$checks$all_done)
+
+      if (rv$checks$all_done) shinyjs::show("check_show") else shinyjs::hide("check_show")
+
+    })
+
+    observeEvent(input$btn_show_checks, {
+      shinyjs::hide("check_progress")
+      shinyjs::hide("check_show")
+      shinyjs::show("check_vbs")
+      shinyjs::show("check_cards")
+    })
+
+    ## 2.2 Value boxes =========================================================
+
+
+
+    ## + 2.2.1 VB Time ----
     output$vb_nb_time <- renderUI({
       req(rv$checks$check_data$all_ok)
       if (rv$checks$check_data$all_ok) {
@@ -189,7 +209,7 @@ mod_tool_server <- function(id, rv) {
     })
 
 
-    ## +++ AD VB ----
+    ## + 2.2.2 VB Activity data ----
     output$vb_nb_trans <- renderUI({
       req(rv$checks$check_data$all_ok)
       if (rv$checks$check_data$all_ok) {
@@ -214,7 +234,7 @@ mod_tool_server <- function(id, rv) {
       }
     })
 
-    ## +++ CS VB ----
+    ## + 2.2.3 VB Carbon stock ----
     output$vb_nb_pools <- renderUI({
       req(rv$checks$check_data$all_ok)
       if (rv$checks$check_data$all_ok) {
@@ -244,8 +264,9 @@ mod_tool_server <- function(id, rv) {
       }
     })
 
-    ## ++ Cards content --------------------------------------------------------
-    ## +++ Table of checks ----
+    ## 2.3 Cards ===============================================================
+
+    ## + 2.3.1 Checks table ----
     output$check_msg <- gt::render_gt({
       req(rv$checks$all_done)
 
@@ -282,7 +303,7 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## +++ Graph of ERs ----
+    ## + 2.3.2 Arithmetic FREL/E/ERs figure ----
     output$check_arithmetic_gg <- renderPlot({
       req(rv$checks$check_data$all_ok, rv$checks$ari_res)
 
@@ -292,7 +313,7 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## +++ LU change matrix ----
+    ## + 2.3.3 LU change matrix ----
     output$check_select_period_UI <- renderUI({
       selectInput(
         inputId = ns("check_select_period"),
@@ -340,62 +361,26 @@ mod_tool_server <- function(id, rv) {
 
     })
 
-    ## 1.5 Show checks after all prepared ==========================================
 
-    ## Update show / hide panels
-    observe({
-      req(rv$checks$all_done)
-
-      if (rv$checks$all_done) shinyjs::show("check_show") else shinyjs::hide("check_show")
-
-    })
-
-    observeEvent(input$btn_show_checks, {
-      shinyjs::hide("check_progress")
-      shinyjs::hide("check_show")
-      shinyjs::show("check_vbs")
-      shinyjs::show("check_cards")
-    })
 
     ##
-    ## 2. Run MCS ##############################################################
+    ## 3. SIDEBAR MCS ##########################################################
     ##
 
-    ## 2.1 Enable button =======================================================
+    ## Run MCS button enabled when all checks are done, see 1.3.8
 
-    ## !!! Now within run checks button event
-    # observe({
-    #
-    #   req(rv$checks$check_data$all_ok)
-    #
-    #
-    #   if(rv$checks$check_data$all_ok) {
-    #     shinyjs::hide("msg_no_check")
-    #     shinyjs::show("msg_checks_ok")
-    #     shinyjs::hide("msg_checks_wrong")
-    #     shinyjs::enable("btn_run_mcs")
-    #   } else {
-    #     shinyjs::hide("msg_no_check")
-    #     shinyjs::hide("msg_checks_ok")
-    #     shinyjs::show("msg_checks_wrong")
-    #     shinyjs::disable("btn_run_mcs")
-    #   }
-    #
-    # })
+    ## 3.1 BTN Run MCS =========================================================
 
-    ## 2.2 Run MCS and calculate res and graphs ================================
     observeEvent(input$btn_run_mcs, {
 
-      ## ++ Move to res panel --------------------------------------------------
-      # nav_select(id = "tool_tabs", selected = ("res_panel"))
-      # update_navs(id = "tool_tabs", selected = ns("res"))
+      ## + 3.1.1 Move to tabset RES ----
       updateTabsetPanel(
         session  = session,
         inputId  = ns("tool_tabs"),
         selected = "res_panel"
       )
 
-      ## ++ Show progress bar --------------------------------------------------
+      ## + 3.1.2 Show progress bar -----
       shinyjs::hide("res_init")
       shinyjs::show("res_progress")
       shinyjs::hide("res_show")
@@ -403,25 +388,24 @@ mod_tool_server <- function(id, rv) {
 
       rv$mcs$all_done <- NULL
 
-      ## ++ Set seed for simulations -------------------------------------------
+      ## + 3.1.3 Set seed for simulations ------
       shinyWidgets::updateProgressBar(
         title = "Set seed for random simulations...",
         session = session, id = "prog_res", value = 0, status = "primary"
       )
 
-      ## Seed for random simulation
       if (!is.na(rv$inputs$usr$ran_seed)){
         set.seed(rv$inputs$usr$ran_seed)
-        message("Random simulations with seed: ", rv$inputs$usr$ran_seed)
+        message("Seed for random simulations: ", rv$inputs$usr$ran_seed)
       } else {
         rv$inputs$usr$app_ran_seed <- sample(1:100, 1)
         set.seed(rv$inputs$usr$app_ran_seed)
-        message("Seed for random simulations: ", rv$inputs$usr$app_ran_seed)
+        message("New seed for random simulations: ", rv$inputs$usr$app_ran_seed)
       }
 
       Sys.sleep(0.1)
 
-      ## ++ LU transitions sims ------------------------------------------------
+      ## + 3.1.4 LU transitions sims ------
       shinyWidgets::updateProgressBar(
         title = "Simulate emissions for each land use transition...",
         session = session, id = "prog_res", value = 10, status = "primary"
@@ -433,7 +417,7 @@ mod_tool_server <- function(id, rv) {
         .usr = rv$inputs$usr
       )
 
-      ## Annualize REDD+ level
+      ## Annualize REDD+ activity data
       if (!rv$inputs$usr$ad_annual) {
         time_periods <- unique(rv$inputs$time$period_type)
         rv$mcs$sim_trans2 <- purrr::map(time_periods, function(x){

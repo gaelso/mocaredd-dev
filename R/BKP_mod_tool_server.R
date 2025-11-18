@@ -3,7 +3,7 @@
 #' @importFrom rlang .data
 #'
 #' @noRd
-mod_tool_server <- function(id, rv) {
+mod_tool_serverBKP <- function(id, rv) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -47,12 +47,11 @@ mod_tool_server <- function(id, rv) {
     observeEvent(input$btn_run_checks, {
 
       ## + 1.3.1 Move to tabset CHECK ----
-      # updateTabsetPanel(
-      #   session,
-      #   inputId = ns("tool_tabs"),
-      #   selected = "check_tab"
-      # )
-      session$sendCustomMessage("activate-tab", list(id = ns("tool_tabs"), value = "check_tab"))
+      updateTabsetPanel(
+        session,
+        inputId = ns("tool_tabs"),
+        selected = "check_panel"
+      )
 
       ## + 1.3.2 Show progress bar ----
       shinyjs::hide("check_init_msg")
@@ -376,12 +375,11 @@ mod_tool_server <- function(id, rv) {
     observeEvent(input$btn_run_mcs, {
 
       ## + 3.1.1 Move to tabset RES ----
-      # updateTabsetPanel(
-      #   session  = session,
-      #   inputId  = ns("tool_tabs"),
-      #   selected = "res_tab"
-      # )
-      session$sendCustomMessage("activate-tab", list(id = ns("tool_tabs"), value = "res_tab"))
+      updateTabsetPanel(
+        session  = session,
+        inputId  = ns("tool_tabs"),
+        selected = "res_panel"
+      )
 
       ## + 3.1.2 Show progress bar -----
       shinyjs::hide("res_init")
@@ -488,14 +486,14 @@ mod_tool_server <- function(id, rv) {
         .id = .data$period_type,
         .sim = .data$E,
         .ci_alpha = rv$inputs$usr$ci_alpha
-        )
+      )
 
       rv$mcs$res_MON <- fct_calc_res(
         .data = rv$mcs$sim_MON,
         .id = .data$period_type,
         .sim = .data$E,
         .ci_alpha = rv$inputs$usr$ci_alpha
-        )
+      )
 
       rv$mcs$res_MON2 <- rv$mcs$res_MON |>
         dplyr::mutate(period_type = paste0("E-", .data$period_type))
@@ -505,7 +503,7 @@ mod_tool_server <- function(id, rv) {
         .id = .data$period_type,
         .sim = .data$ER_sim,
         .ci_alpha = rv$inputs$usr$ci_alpha
-        )
+      )
 
       rv$mcs$res_ER2 <- rv$mcs$res_ER |>
         dplyr::mutate(period_type = paste0("ER-", .data$period_type))

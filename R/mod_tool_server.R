@@ -3,7 +3,7 @@
 #' @importFrom rlang .data
 #'
 #' @noRd
-mod_tool_server <- function(id, rv) {
+mod_tool_server2 <- function(id, rv) {
 
   moduleServer(id, function(input, output, session) {
 
